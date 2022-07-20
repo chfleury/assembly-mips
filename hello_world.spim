@@ -1,0 +1,9 @@
+.data
+	str: .ascii "Ola Mundo\n" #declarando a string
+.text
+	main:
+	li $v0, 4  # código do sitema para printar a string
+	la $a0, str #endereço da string a imprimir no registrador $a
+	syscall # printando
+	li $v0, 10 # codigo do sistema para finalizar o programa
+	syscall # finalizando
