@@ -1,0 +1,17 @@
+.data
+fimLinha: .asciiz "\n"
+.text
+	main:
+	li $v0, 5  # código do sitema para leitura de inteiros
+	syscall # lendo o numero
+	move $t0, $v0 # movendo o valor para $t0
+	li $v0, 5  # código do sitema para leitura de inteiros
+	syscall # lendo inteiro de novo 
+	add $a0, $t0, $v0 # somando o primeiro inteiro com o segundo que está em $v0 pois acabou de ser lido
+	li $v0, 1 #codigo do sistema para printar inteiros
+	syscall # printando inteiro (resposta)
+	li $v0, 4  # código do sitema para printar a string
+	la $a0, fimLinha #endereço da string a imprimir no registrador $a
+	syscall # printando
+	li $v0, 10 # codigo do sistema para finalizar o programa
+	syscall # finalizando
