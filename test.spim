@@ -11,8 +11,8 @@
 	li $v0, 6  # código do sitema para leitura de float
 	syscall # lendo o numero (o valor estara em $f0)
 
-    mfc1 $t1 $f0 # armazenando o float em $t1 como inteiro
-    lwc1 $f1, zeroFloat # carregando o zeroFloat no registrador $t1
+    mfc1 $s8 $f0 # armazenando o float em $s8 como inteiro
+    lwc1 $f1, zeroFloat # carregando o zeroFloat no registrador $s8
     add.s $f12, $f0, $f1 # adicionando o float lido em $f0 para $f12 para printar 
 
 	li $v0, 2 # codigo do sistema para printar float
@@ -25,9 +25,9 @@
 
     #---------------------------------------------------------------------
     # pegando o bit de sinal (31)
-    addi  $t0 $zero 1 # adicionando 1 em t0 ( 0000 ... 0001)
-    sll  $t0 $t0 31 # shiftando 31 bits pra esquerda ( 1000 ... 0000)
-    and  $a0 $t0 $t1 # fazendo AND logico para obter apenas o bit de sinal de acordo com nossa mascara acima
+    addi  $s7 $zero 1 # adicionando 1 em $s7 ( 0000 ... 0001)
+    sll  $s7 $s7 31 # shiftando 31 bits pra esquerda ( 1000 ... 0000)
+    and  $a0 $s7 $s8 # fazendo AND logico para obter apenas o bit de sinal de acordo com nossa mascara acima
     srl  $a0 $a0 31 # shiftando a0 31 bits para direita para ter somente o bit de sinal  ( 000x ) 
     beq  $a0, 0, imprimeMais # se o bit de sinal for 1, branch para imprimeMais
     bne  $a0, 0, imprimeMenos # se o bit de sinal for 0, branch para imprimeMenos
@@ -44,12 +44,12 @@
 
     # ------------------------------------------------------------------------
     # pegar bits 23-30 (expoente)
-    addi  $t0 $zero 255 # criando uma mascara em $t0 para pegar expoente com o valor 255, que em binario fica 1111 1111 
-    sll  $t0 $t0 23 # shift de 23 para esquerda da máscara para  deixar no formato 0 11111111 0000000000000000000000
-    and  $a0 $t0 $t1 # fazendo and logico para pegar apenas o expoente de $t1 e armazenando em $a0
+    addi  $s7 $zero 255 # criando uma mascara em $s7 para pegar expoente com o valor 255, que em binario fica 1111 1111 
+    sll  $s7 $s7 23 # shift de 23 para esquerda da máscara para  deixar no formato 0 11111111 0000000000000000000000
+    and  $a0 $s7 $s8 # fazendo and logico para pegar apenas o expoente de $s8 e armazenando em $a0
     srl  $a0 $a0 23 # shift de 23 para direita para remover os zeros que estavam a direita e ficar apenas com o valor do expoente
-    addi  $t3, $zero, 127 # adicionando 127 no reg $t3
-    sub $a0, $a0, $t3 # subtraindo 127 do bias
+    addi  $s3, $zero, 127 # adicionando 127 no reg $s3
+    sub $a0, $a0, $s3 # subtraindo 127 do bias
     
     li $v0, 1 # codigo para print de inteiros
     syscall # printando o expoente
@@ -60,8 +60,8 @@
 
 # -------------------------------------------------------------------------
   # pegar bits 0-22 (mantissa)
-    lw $t0, mascara # carregando a máscara em $t0 da mantissa (11111111111111111111111) para $t0
-    and  $a0, $t0, $t1 # adicionando a mascara
+    lw $s7, mascara # carregando a máscara em $s7 da mantissa (11111111111111111111111) para $s7
+    and  $a0, $s7, $s8 # adicionando a mascara
     
     addi $s3, $zero, 23 # registrador para controlar a qunatidade de vezes que o loop vai rodar
 
