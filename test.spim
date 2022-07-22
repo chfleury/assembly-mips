@@ -44,9 +44,9 @@
 
     # ------------------------------------------------------------------------
     # pegar bits 23-30 (expoente)
-    addi  $t0 $zero 255 # criando uma mascara para pegar expoente com o valor 255, que em binario fica 1111 1111 
+    addi  $t0 $zero 255 # criando uma mascara em $t0 para pegar expoente com o valor 255, que em binario fica 1111 1111 
     sll  $t0 $t0 23 # shift de 23 para esquerda da máscara para  deixar no formato 0 11111111 0000000000000000000000
-    and  $a0 $t0 $t1 # fazendo and logico para pegar apenas o expoente e armazenando em $a0
+    and  $a0 $t0 $t1 # fazendo and logico para pegar apenas o expoente de $t1 e armazenando em $a0
     srl  $a0 $a0 23 # shift de 23 para direita para remover os zeros que estavam a direita e ficar apenas com o valor do expoente
     addi  $t3, $zero, 127 # adicionando 127 no reg $t3
     sub $a0, $a0, $t3 # subtraindo 127 do bias
@@ -60,10 +60,8 @@
 
 # -------------------------------------------------------------------------
   # pegar bits 0-22 (mantissa)
-    lw $t2, mascara # carregando a máscara da mantissa (11111111111111111111111) para $t2 
-    add  $t0, $zero, $t2
-    and  $a0, $t0, $t1
-
+    lw $t0, mascara # carregando a máscara em $t0 da mantissa (11111111111111111111111) para $t0
+    and  $a0, $t0, $t1 # adicionando a mascara
     
     addi $s3, $zero, 23 # registrador para controlar a qunatidade de vezes que o loop vai rodar
 
@@ -74,26 +72,26 @@
 
     #printando a string de inicio do hex 0x + um zeo pois como a mantissa so tem 23 bits, vai ser sempre zero o primeiro digito nesse formato de hex
     li $v0, 4  # código do sitema para printar a string
-	la $a0, hex #endereço da string a imprimir no registrador $a
-    syscall
+	la $a0, hex # endereço da string a imprimir no registrador $a
+    syscall # printando
 loop:
     ble $s3, $zero, termina # condicao para finalizar o loop
-    rol $s0, $s0, 4             # Fazendo rotate para esquerda e pegando os 4 lsb
-    and $s1, $s0, 15            # bitmask para adicionar em $s1 apenas os 4 lsb depois do rotate
+    rol $s0, $s0, 4 # Fazendo rotate para esquerda e pegando os 4 lsb
+    and $s1, $s0, 15 # bitmask para adicionar em $s1 apenas os 4 lsb depois do rotate
 
-    li $v0, 11
-    ble $s1, 9, pularSoma        # If s1 <= 9, go to print
-    add $s1, $s1, 7   
+    li $v0, 11 # codigo 11 no $v0 para printar um char
+    ble $s1, 9, pularSoma # se o valor do char for <= que 9, pula a soma 
+    add $s1, $s1, 7 # se o valor do char for maior que 9, soma 7 a mais para pegar as letras A, B, C... 
 
 
 pularSoma:
     addi $a0, $s1 , 48 # somando 48 para pegar o codigo ascii
 
-    syscall
+    syscall # printando o char
 
-    addi $s3, $s3, -4
+    addi $s3, $s3, -4 # subtraindo no registrador que controla o loop
 
-    j loop
+    j loop # volta para o loop
 
     li $v0, 4  # código do sitema para printar a string
 	la $a0, fimLinha #endereço da string a imprimir no registrador $a
