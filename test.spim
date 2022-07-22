@@ -1,10 +1,9 @@
 .data
     zeroFloat: .float 0.00000000
     fimLinha: .asciiz "\n"
-    mais: .asciiz "+"
-    menos: .asciiz "-"
+    mais: .asciiz "+\n"
+    menos: .asciiz "-\n"
     mascara: .word 8388607
-    array:  .space  16
     hex: .asciiz "0x0"
 .text
 	main:
@@ -12,12 +11,12 @@
 	li $v0, 6  # código do sitema para leitura de float
 	syscall # lendo o numero (o valor estara em $f0)
 
-    mfc1 $t8 $f0 #store in $t8
-    lwc1 $f1, zeroFloat
-    add.s $f12, $f0, $f1
+    mfc1 $t1 $f0 # armazenando o float em $t1 como inteiro
+    lwc1 $f1, zeroFloat # carregando o zeroFloat no registrador $t1
+    add.s $f12, $f0, $f1 # adicionando o float lido em $f0 para $f12 para printar 
 
-	li $v0, 2 #codigo do sistema para printar float
-	syscall # printando float
+	li $v0, 2 # codigo do sistema para printar float
+	syscall # printando float que está em $f12
 
 
 	li $v0, 4  # código do sitema para printar a string
@@ -25,34 +24,29 @@
 	syscall # printando
 
     #---------------------------------------------------------------------
-    # pegando o bit de sinal
+    # pegando o bit de sinal (31)
     addi  $t0 $zero 1 # adicionando 1 em t0 ( 0000 ... 0001)
     sll  $t0 $t0 31 # shiftando 31 bits pra esquerda ( 1000 ... 0000)
-    and  $a0 $t0 $t8 # fazendo AND logico para obter apenas o bit de sinal de acordo com nossa mascara acima
+    and  $a0 $t0 $t1 # fazendo AND logico para obter apenas o bit de sinal de acordo com nossa mascara acima
     srl  $a0 $a0 31 # shiftando a0 31 bits para direita para ter somente o bit de sinal  ( 000x ) 
-    beq  $a0, 0, imprimeMais
-    bne  $a0, 0, imprimeMenos
+    beq  $a0, 0, imprimeMais # se o bit de sinal for 1, branch para imprimeMais
+    bne  $a0, 0, imprimeMenos # se o bit de sinal for 0, branch para imprimeMenos
 
     imprimeMenos:
-        la $a0, menos
-        j fimIf
+        la $a0, menos # adiciona -\n em $a0
+        j fimIf # branch para fimIf
 
     imprimeMais:
-        la $a0, mais
+        la $a0, mais # adiciona +\n em $a0
     
     fimIf:
-        syscall
-
-	li $v0, 4  # código do sitema para printar a string
-	la $a0, fimLinha #endereço da string a imprimir no registrador $a
-	syscall # printando
-
+        syscall # printando + ou - e quebra de linha
 
     # ------------------------------------------------------------------------
     # pegar bits 23-30 (expoente)
     addi  $t0 $zero 255 # criando uma mascara para pegar expoente com o valor 255, que em binario fica 1111 1111 
     sll  $t0 $t0 23 # shift de 23 para esquerda da máscara para  deixar no formato 0 11111111 0000000000000000000000
-    and  $a0 $t0 $t8 # fazendo and logico para pegar apenas o expoente e armazenando em $a0
+    and  $a0 $t0 $t1 # fazendo and logico para pegar apenas o expoente e armazenando em $a0
     srl  $a0 $a0 23 # shift de 23 para direita para remover os zeros que estavam a direita e ficar apenas com o valor do expoente
     addi  $t3, $zero, 127 # adicionando 127 no reg $t3
     sub $a0, $a0, $t3 # subtraindo 127 do bias
@@ -65,11 +59,10 @@
 	syscall # printando
 
 # -------------------------------------------------------------------------
-
-  # pegar bits 0-22
-    lw $t2, mascara
+  # pegar bits 0-22 (mantissa)
+    lw $t2, mascara # carregando a máscara da mantissa (11111111111111111111111) para $t2 
     add  $t0, $zero, $t2
-    and  $a0, $t0, $t8
+    and  $a0, $t0, $t1
 
     
     addi $s3, $zero, 23 # registrador para controlar a qunatidade de vezes que o loop vai rodar
