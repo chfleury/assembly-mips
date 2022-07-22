@@ -4,24 +4,23 @@
     mais: .asciiz "+\n"
     menos: .asciiz "-\n"
     mascara: .word 8388607
-    hex: .asciiz "0x0"
+    hex: .asciiz "0x"
 .text
-	main:
-
-	li $v0, 6  # código do sitema para leitura de float
-	syscall # lendo o numero (o valor estara em $f0)
+main:
+    li $v0, 6  # código do sitema para leitura de float
+    syscall # lendo o numero (o valor estara em $f0)
 
     mfc1 $s8 $f0 # armazenando o float em $s8 como inteiro
     lwc1 $f1, zeroFloat # carregando o zeroFloat no registrador $s8
     add.s $f12, $f0, $f1 # adicionando o float lido em $f0 para $f12 para printar 
 
-	li $v0, 2 # codigo do sistema para printar float
-	syscall # printando float que está em $f12
+    li $v0, 2 # codigo do sistema para printar float
+    syscall # printando float que está em $f12
 
 
-	li $v0, 4  # código do sitema para printar a string
-	la $a0, fimLinha #endereço da string a imprimir no registrador $a
-	syscall # printando
+    li $v0, 4  # código do sitema para printar a string
+    la $a0, fimLinha #endereço da string a imprimir no registrador $a
+    syscall # printando
 
     #---------------------------------------------------------------------
     # pegando o bit de sinal (31)
@@ -42,7 +41,7 @@
     fimIf:
         syscall # printando + ou - e quebra de linha
 
-    # ------------------------------------------------------------------------
+    # ------------------------------------------------------------------------___
     # pegar bits 23-30 (expoente)
     addi  $s7 $zero 255 # criando uma mascara em $s7 para pegar expoente com o valor 255, que em binario fica 1111 1111 
     sll  $s7 $s7 23 # shift de 23 para esquerda da máscara para  deixar no formato 0 11111111 0000000000000000000000
@@ -63,14 +62,11 @@
     lw $s7, mascara # carregando a máscara em $s7 da mantissa (11111111111111111111111) para $s7
     and  $a0, $s7, $s8 # adicionando a mascara
     
-    addi $s3, $zero, 23 # registrador para controlar a qunatidade de vezes que o loop vai rodar
+    addi $s3, $zero, 8 # registrador para controlar a qunatidade de vezes que o loop vai rodar
 
     add $s0, $a0, $zero # armazenando dos dados de $a0 no registrador $s0
-    sll $s0, $s0, 8 # fazendo um offset de 8 bits, pois o registrador tem 32 bits
-    # e a mantissa tem 23 (representado em 24), assim fazemos que a mantissa passe de:
-    # 0000 0000 0111 1111 1111 1111 1111 1111 para 0111 1111 1111 1111 1111 1111 0000 0000
 
-    #printando a string de inicio do hex 0x + um zeo pois como a mantissa so tem 23 bits, vai ser sempre zero o primeiro digito nesse formato de hex
+    #printando a string de inicio do hex (0x)
     li $v0, 4  # código do sitema para printar a string
 	la $a0, hex # endereço da string a imprimir no registrador $a
     syscall # printando
@@ -83,25 +79,18 @@ loop:
     ble $s1, 9, pularSoma # se o valor do char for <= que 9, pula a soma 
     add $s1, $s1, 7 # se o valor do char for maior que 9, soma 7 a mais para pegar as letras A, B, C... 
 
-
 pularSoma:
-    addi $a0, $s1 , 48 # somando 48 para pegar o codigo ascii
-
+    addi $a0, $s1 , 48 # somando 48 e salvando em $a0 para pegar o codigo ascii e printar
     syscall # printando o char
 
-    addi $s3, $s3, -4 # subtraindo no registrador que controla o loop
-
+    addi $s3, $s3, -1 # subtraindo no registrador que controla o loop
     j loop # volta para o loop
 
     li $v0, 4  # código do sitema para printar a string
 	la $a0, fimLinha #endereço da string a imprimir no registrador $a
 	syscall # printando
 
- 
-
-  
 # -------------------------------------------------------------------------
-
 termina:
 	li $v0, 4  # código do sitema para printar a string
 	la $a0, fimLinha #endereço da string a imprimir no registrador $a
