@@ -75,14 +75,16 @@
 
     
 # -------------------------------------------------------------------------
-    addi $s3, $zero, 23
+    addi $s3, $zero, 23 # registrador para controlar a qunatidade de vezes que o loop vai rodar
 
     add $s0, $a0, $zero # armazenando dos dados de $a0 no registrador $s0
-    sll $s0, $s0, 4 # fazendo um offset de 4 bits ex:  1010 1011 1111 0000
+    sll $s0, $s0, 8 # fazendo um offset de 8 bits, pois o registrador tem 32 bits
+    # e a mantissa tem 23 (representado em 24), assim fazemos que a mantissa passe de:
+    # 0000 0000 0111 1111 1111 1111 1111 1111 para 0111 1111 1111 1111 1111 1111 0000 0000
 hexloop:
-    ble $s3, $zero, termina
-    srl $s0, $s0, 4             # Fazendo shift pra direita e pegando os 4 lsb ex: (1111)
-    and $s1, $s0, 15            # Mask 15 digits in s2 and place results in s1
+    ble $s3, $zero, termina # condicao para finalizar o loop
+    rol $s0, $s0, 4             # Fazendo rotate para esquerda e pegando os 4 lsb
+    and $s1, $s0, 15            # bitmask para adicionar em $s1 apenas os 4 lsb depois do rotate
 
     li $v0, 1
     add $a0, $s1 , $zero 
