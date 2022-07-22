@@ -4,7 +4,8 @@
     mais: .asciiz "+"
     menos: .asciiz "-"
     mascara: .word 8388607
-    hexresult:  .space  8
+    hexresult:  .space  16
+    hex: .asciiz "0x"
 .text
 	main:
 
@@ -89,13 +90,17 @@ hexprint:
     add $s3, $s3, 1             # s3 = s3 + 1
     add $s0, $s0, -1            # s0 = s0 - 1
     bnez $s0, hexloop           # If s0 != 0, go to hexloop
-    la $a0, hexresult           # display result
-
 
     li $v0, 4
+    la $a0, hex           # display result
+
     syscall
 
-    jr $ra                      # Return
+
+    la $a0, hexresult           # display result
+
+    syscall
+
 
 # -------------------------------------------------------------------------
 
