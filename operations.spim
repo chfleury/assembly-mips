@@ -13,213 +13,109 @@
 .text
 
 	main:
-		li $v0, 5  # código do sitema para leitura de inteiros
-		syscall # lendo o numero
+		jal lerInteiro # chamando a funcao ler inteiro
 		move $s1, $v0 # movendo o valor para $s1
 
-		li $v0, 5  # código do sitema para leitura de inteiros
-		syscall # lendo o numero
+		jal lerInteiro # chamando a funcao ler inteiro
 		move $s2, $v0 # movendo o valor para $s2
 
-		li $v0, 5  # código do sitema para leitura de inteiros
-		syscall # lendo o numero
+		jal lerInteiro # chamando a funcao ler inteiro
 		move $s3, $v0 # movendo o valor para $s3
 
-		jal printarAdd
-		jal printarSub
-		jal printarAnd
-		jal printarOr
-		jal printarXor
-		jal printarMask
-		move $a1, $v1 #passando o retorno da mascara $v1 para o $a1 para usar como argumento no sll e srl
-		jal printarSll
-		jal printarSrl
-		j finalizarPrograma
+		la $a1, ADD  # carregando a string para o registrador $a1
+		add $a2, $s1, $s2 # fazendo a operação e salvando no registrador $a2
+		jal printarOperacao # chamando a função printarOperação passando $a1 e $a2 como parametros
 
-	printarAdd:
-		addi $sp, $sp, -4
-		sw $ra, 0($sp)
+		la $a1, SUB  # carregando a string para o registrador $a1
+		sub $a2, $s1, $s2 # fazendo a operação e salvando no registrador $a2
+		jal printarOperacao # chamando a função printarOperação passando $a1 e $a2 como parametros
 
-		li $v0, 4
-		la $a0, ADD
-		syscall
+		la $a1, AND  # carregando a string para o registrador $a1
+		and $a2, $s1, $s2 # fazendo a operação e salvando no registrador $a2
+		jal printarOperacao # chamando a função printarOperação passando $a1 e $a2 como parametros
 
-		li $v0, 1
-		add $a0, $s1, $s2
-		syscall
+		la $a1, OR  # carregando a string para o registrador $a1
+		or $a2, $s1, $s2 # fazendo a operação e salvando no registrador $a2
+		jal printarOperacao # chamando a função printarOperação passando $a1 e $a2 como parametros
 
-
-
-		jal printarFimLinha
-
-		lw $ra, 0($sp)
-		addi $sp, $sp, 4
-
-		jr $ra
-
-	printarSub:
-		addi $sp, $sp, -4
-		sw $ra, 0($sp)
-
-		li $v0, 4
-		la $a0, SUB
-		syscall
-
-		li $v0, 1
-		sub $a0, $s1, $s2
-		syscall
-
-		jal printarFimLinha
-
-		lw $ra, 0($sp)
-		addi $sp, $sp, 4
-
-		jr $ra
-
-
-	printarAnd:
-		addi $sp, $sp, -4
-		sw $ra, 0($sp)
-
-		li $v0, 4
-		la $a0, AND
-		syscall
-
-		li $v0, 1
-		and $a0, $s1, $s2
-		syscall
-
-		jal printarFimLinha
-
-		lw $ra, 0($sp)
-		addi $sp, $sp, 4
-
-		jr $ra	
+		la $a1, XOR  # carregando a string para o registrador $a1
+		xor $a2, $s1, $s2 # fazendo a operação e salvando no registrador $a2
+		jal printarOperacao # chamando a função printarOperação passando $a1 e $a2 como parametros
+		
+		la $a1, MASK  # carregando a string para o registrador $a1
+		and $a2, $s3, 31  # faz um and entre $s3 e 31 e salva em $a2
+		jal printarOperacao # chamando a função printarOperação passando $a1 e $a2 como parametros
 	
 
-	printarOr:
-		addi $sp, $sp, -4
-		sw $ra, 0($sp)
+		# parametros do printarShift: $a1, string( SLL ou SRL), $a2: resultado do and da mascara, $a3, resultado do shift
+		la $a1, SLL  # carregando a string para o registrador $a1
+		sll $a3, $s1, $a2  # fazendo a operação e salvando no registrador $a3
+		jal printarShift # chamando a função de printarShift
+		
+		la $a1, SRL  # carregando a string para o registrador $a1
+		srl $a3, $s2, $a2 # fazendo a operação e salvando no registrador $a3
+		jal printarShift # chamando a função de printarShift
 
-		li $v0, 4
-		la $a0, OR
-		syscall
-
-		li $v0, 1
-		or $a0, $s1, $s2
-		syscall
-
-		jal printarFimLinha
-
-		lw $ra, 0($sp)
-		addi $sp, $sp, 4
-
-		jr $ra	
-
-
-	printarXor:
-		addi $sp, $sp, -4
-		sw $ra, 0($sp)
-
-		li $v0, 4
-		la $a0, XOR
-		syscall
-
-		li $v0, 1
-		xor $a0, $s1, $s2
-		syscall
-
-		jal printarFimLinha
-
-		lw $ra, 0($sp)
-		addi $sp, $sp, 4
-
-		jr $ra	
-
+		j finalizarPrograma # jump para terminar o programa
 
 	printarFimLinha:
-		li $v0, 4
-		la $a0, fimLinha
-		syscall
+		li $v0, 4 # codigo para printar string
+		la $a0, fimLinha # carregando o fimLinha para $a0
+		syscall # printando fimLinha
 
-		jr $ra
+		jr $ra # voltando
 		
 	finalizarPrograma:
 		li $v0, 10  # código do sitema para finalizar programa
 		syscall # finalizanddo
 
-	printarMask:
-		addi $sp, $sp, -4
-		sw $ra, 0($sp)
+	printarOperacao:
+		addi $sp, $sp, -4 # alocando 4 bytes na stack
+		sw $ra, 0($sp) # armazenando a palvra $ra na stack
 
-		li $v0, 4
-		la $a0, MASK
-		syscall
+		li $v0, 4 # codigo para printar string
+		move $a0, $a1 # movendo o valor do parametro $a1 para $a0
+		syscall # printando
 
-		li $v0, 1
-		and $v1, $s3, 31
-		move $a0, $v1
-		syscall
+		li $v0, 1 # codigo para printar inteiro
+		move $a0, $a2 # movendo o valor do parametro $a2 para $a0
+		syscall # printando
 
-		jal printarFimLinha
+		jal printarFimLinha # chamando função que printa quebra de linha
 
-		lw $ra, 0($sp)
-		addi $sp, $sp, 4
+		lw $ra, 0($sp) # lendo o valor que tinhamos salvo na stack de volta para $ra 
+		addi $sp, $sp, 4 # desalocando os 4 bytes da stack
 
-		jr $ra	
+		jr $ra # voltando para onde a função foi chamada
 
+	printarShift:
+		addi $sp, $sp, -4 # alocando 4 bytes na stack
+		sw $ra, 0($sp) # armazenando a palvra $ra na stack
 
-	printarSll:
-		addi $sp, $sp, -4
-		sw $ra, 0($sp)
+		li $v0, 4 # codigo para printar string
+		move $a0, $a1 # movendo o valor do parametro $a1 para $a0
+		syscall # printando
 
-		li $v0, 4
-		la $a0, SLL
-		syscall
+		li $v0, 1 # codigo para printar inteiro
+		move $a0, $a2 # movendo o valor do parametro $a2 para $a0
+		syscall # printando
 
-		li $v0, 1
-		move $a0, $a1
-		syscall
+		li $v0, 4 # codigo para printar string
+		la $a0, parenteses  # carregando o valor da string parenteses
+		syscall # printando a fecha de parenteses
 
-		li $v0, 4
-		la $a0, parenteses
-		syscall
+		li $v0, 1 # codigo para printar inteiro
+		move $a0, $a3 # movendo o valor do parametro $a3 (resultado do shift) para $a0
+		syscall # printando
 
-		li $v0, 1
-		sll $a0, $s1, $a1
-		syscall
+		jal printarFimLinha # chamando função para printar quebra de linha
 
-		jal printarFimLinha
+		lw $ra, 0($sp) # lendo o valor que tinhamos salvo na stack de volta para $ra 
+		addi $sp, $sp, 4 # desalocando os 4 bytes da stack
 
-		lw $ra, 0($sp)
-		addi $sp, $sp, 4
+		jr $ra # voltando para onde a função foi chamada
 
-		jr $ra	
-
-	printarSrl:
-		addi $sp, $sp, -4
-		sw $ra, 0($sp)
-
-		li $v0, 4
-		la $a0, SRL
-		syscall
-
-		li $v0, 1
-		move $a0, $a1
-		syscall
-
-		li $v0, 4
-		la $a0, parenteses
-		syscall
-
-		li $v0, 1
-		srl $a0, $s2, $a1
-		syscall
-
-		jal printarFimLinha
-
-		lw $ra, 0($sp)
-		addi $sp, $sp, 4
-
-		jr $ra	
-
+	lerInteiro:
+		li $v0, 5  # código do sitema para leitura de inteiros
+		syscall # lendo o numero
+		jr $ra	# voltando
