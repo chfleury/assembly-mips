@@ -30,6 +30,10 @@
 		jal printarAnd
 		jal printarOr
 		jal printarXor
+		jal printarMask
+		move $a1, $v1 #passando o retorno da mascara $v1 para o $a1 para usar como argumento no sll e srl
+		jal printarSll
+		jal printarSrl
 		j finalizarPrograma
 
 	printarAdd:
@@ -132,6 +136,7 @@
 
 		jr $ra	
 
+
 	printarFimLinha:
 		li $v0, 4
 		la $a0, fimLinha
@@ -142,3 +147,79 @@
 	finalizarPrograma:
 		li $v0, 10  # código do sitema para finalizar programa
 		syscall # finalizanddo
+
+	printarMask:
+		addi $sp, $sp, -4
+		sw $ra, 0($sp)
+
+		li $v0, 4
+		la $a0, MASK
+		syscall
+
+		li $v0, 1
+		and $v1, $s3, 31
+		move $a0, $v1
+		syscall
+
+		jal printarFimLinha
+
+		lw $ra, 0($sp)
+		addi $sp, $sp, 4
+
+		jr $ra	
+
+
+	printarSll:
+		addi $sp, $sp, -4
+		sw $ra, 0($sp)
+
+		li $v0, 4
+		la $a0, SLL
+		syscall
+
+		li $v0, 1
+		move $a0, $a1
+		syscall
+
+		li $v0, 4
+		la $a0, parenteses
+		syscall
+
+		li $v0, 1
+		sll $a0, $s1, $a1
+		syscall
+
+		jal printarFimLinha
+
+		lw $ra, 0($sp)
+		addi $sp, $sp, 4
+
+		jr $ra	
+
+	printarSrl:
+		addi $sp, $sp, -4
+		sw $ra, 0($sp)
+
+		li $v0, 4
+		la $a0, SRL
+		syscall
+
+		li $v0, 1
+		move $a0, $a1
+		syscall
+
+		li $v0, 4
+		la $a0, parenteses
+		syscall
+
+		li $v0, 1
+		srl $a0, $s2, $a1
+		syscall
+
+		jal printarFimLinha
+
+		lw $ra, 0($sp)
+		addi $sp, $sp, 4
+
+		jr $ra	
+

@@ -1,5 +1,5 @@
 .data
-fimLinha: .asciiz "\n"
+	fimLinha: .asciiz "\n"
 .text
 	main:
 	li $v0, 5  # código do sitema para leitura de inteiros
