@@ -1,110 +1,97 @@
 .data
     zeroFloat: .float 0.00000000
     fimLinha: .asciiz "\n"
-    mais: .asciiz "+"
-    menos: .asciiz "-"
+    mais: .asciiz "+\n"
+    menos: .asciiz "-\n"
     mascara: .word 8388607
-    hexresult:  .space  16
     hex: .asciiz "0x"
 .text
-	main:
+main:
+    li $v0, 6  # código do sitema para leitura de float
+    syscall # lendo o numero (o valor estara em $f0)
 
-	li $v0, 6  # código do sitema para leitura de float
-	syscall # lendo o numero (o valor estara em $f0)
+    mfc1 $s8 $f0 # armazenando o float em $s8 como inteiro
+    lwc1 $f1, zeroFloat # carregando o zeroFloat no registrador $s8
+    add.s $f12, $f0, $f1 # adicionando o float lido em $f0 para $f12 para printar 
 
-    mfc1 $t8 $f0 #store in $t8
-    lwc1 $f1, zeroFloat
-    add.s $f12, $f0, $f1
-
-	li $v0, 2 #codigo do sistema para printar float
-	syscall # printando float
+    li $v0, 2 # codigo do sistema para printar float
+    syscall # printando float que está em $f12
 
 
-	li $v0, 4  # código do sitema para printar a string
-	la $a0, fimLinha #endereço da string a imprimir no registrador $a
-	syscall # printando
+    li $v0, 4  # código do sitema para printar a string
+    la $a0, fimLinha #endereço da string a imprimir no registrador $a
+    syscall # printando
 
     #---------------------------------------------------------------------
-    # pegando o bit de sinal
-    addi  $t0 $zero 1 # adicionando 1 em t0 ( 0000 ... 0001)
-    sll  $t0 $t0 31 # shiftando 31 bits pra esquerda ( 1000 ... 0000)
-    and  $a0 $t0 $t8 # fazendo AND logico para obter apenas o bit de sinal de acordo com nossa mascara acima
+    # pegando o bit de sinal (31)
+    addi  $s7 $zero 1 # adicionando 1 em $s7 ( 0000 ... 0001)
+    sll  $s7 $s7 31 # shiftando 31 bits pra esquerda ( 1000 ... 0000)
+    and  $a0 $s7 $s8 # fazendo AND logico para obter apenas o bit de sinal de acordo com nossa mascara acima
     srl  $a0 $a0 31 # shiftando a0 31 bits para direita para ter somente o bit de sinal  ( 000x ) 
-    beq  $a0, 0, imprimeMais
-    bne  $a0, 0, imprimeMenos
+    beq  $a0, 0, imprimeMais # se o bit de sinal for 1, branch para imprimeMais
+    bne  $a0, 0, imprimeMenos # se o bit de sinal for 0, branch para imprimeMenos
 
     imprimeMenos:
-        la $a0, menos
-        j fimIf
+        la $a0, menos # adiciona -\n em $a0
+        j fimIf # branch para fimIf
 
     imprimeMais:
-        la $a0, mais
+        la $a0, mais # adiciona +\n em $a0
     
     fimIf:
-        syscall
+        syscall # printando + ou - e quebra de linha
 
-	li $v0, 4  # código do sitema para printar a string
-	la $a0, fimLinha #endereço da string a imprimir no registrador $a
-	syscall # printando
-
-
-    # ------------------------------------------------------------------------
-    # pegar bits 23-30
-    addi  $t0 $zero 255 
-    sll  $t0 $t0 23
-    and  $a0 $t0 $t8
-    srl  $a0 $a0 23
-    addi  $t3, $zero, 127
-    sub $a0, $a0, $t3
+    # ------------------------------------------------------------------------___
+    # pegar bits 23-30 (expoente)
+    addi  $s7 $zero 255 # criando uma mascara em $s7 para pegar expoente com o valor 255, que em binario fica 1111 1111 
+    sll  $s7 $s7 23 # shift de 23 para esquerda da máscara para  deixar no formato 0 11111111 0000000000000000000000
+    and  $a0 $s7 $s8 # fazendo and logico para pegar apenas o expoente de $s8 e armazenando em $a0
+    srl  $a0 $a0 23 # shift de 23 para direita para remover os zeros que estavam a direita e ficar apenas com o valor do expoente
+    addi  $s3, $zero, 127 # adicionando 127 no reg $s3
+    sub $a0, $a0, $s3 # subtraindo 127 do bias
     
-    #print exponent
-    li $v0, 1
-    syscall
+    li $v0, 1 # codigo para print de inteiros
+    syscall # printando o expoente
 
 	li $v0, 4  # código do sitema para printar a string
 	la $a0, fimLinha #endereço da string a imprimir no registrador $a
 	syscall # printando
 
 # -------------------------------------------------------------------------
-
-  # pegar bits 0-22
-    lw $t2, mascara
-    add  $t0, $zero, $t2
-    and  $a0, $t0, $t8
+  # pegar bits 0-22 (mantissa)
+    lw $s7, mascara # carregando a máscara em $s7 da mantissa (11111111111111111111111) para $s7
+    and  $a0, $s7, $s8 # adicionando a mascara
     
-# -------------------------------------------------------------------------
+    addi $s3, $zero, 8 # registrador para controlar a qunatidade de vezes que o loop vai rodar
 
+    add $s0, $a0, $zero # armazenando dos dados de $a0 no registrador $s0
 
-    li $s0, 8                   # 8 digits for hex word
-    la $s3, hexresult           # Hex string set up here
+    #printando a string de inicio do hex (0x)
+    li $v0, 4  # código do sitema para printar a string
+	la $a0, hex # endereço da string a imprimir no registrador $a
+    syscall # printando
+loop:
+    ble $s3, $zero, termina # condicao para finalizar o loop
+    rol $s0, $s0, 4 # Fazendo rotate para esquerda e pegando os 4 lsb
+    and $s1, $s0, 15 # bitmask para adicionar em $s1 apenas os 4 lsb depois do rotate
 
-hexloop:
-    rol $a0, $a0, 4             # Start with leftmost digit
-    and $s1, $a0, 15            # Mask 15 digits in s2 and place results in s1
-    ble $s1, 9, hexprint        # If s1 <= 9, go to print
-    add $s1, $s1, 7             # Else s1 = s1 + 7 (to get A-F)
+    li $v0, 11 # codigo 11 no $v0 para printar um char
+    ble $s1, 9, pularSoma # se o valor do char for <= que 9, pula a soma 
+    add $s1, $s1, 7 # se o valor do char for maior que 9, soma 7 a mais para pegar as letras A, B, C... 
 
-hexprint:
-    add $s1, $s1, 48            # Add 48 (30 hex) to get ascii code
-    sb $s1, ($s3)               # Store byte in result. s3 -> result
-    add $s3, $s3, 1             # s3 = s3 + 1
-    add $s0, $s0, -1            # s0 = s0 - 1
-    bnez $s0, hexloop           # If s0 != 0, go to hexloop
+pularSoma:
+    addi $a0, $s1 , 48 # somando 48 e salvando em $a0 para pegar o codigo ascii e printar
+    syscall # printando o char
 
-    li $v0, 4
-    la $a0, hex           # display result
+    addi $s3, $s3, -1 # subtraindo no registrador que controla o loop
+    j loop # volta para o loop
 
-    syscall
-
-
-    la $a0, hexresult           # display result
-
-    syscall
-
+    li $v0, 4  # código do sitema para printar a string
+	la $a0, fimLinha #endereço da string a imprimir no registrador $a
+	syscall # printando
 
 # -------------------------------------------------------------------------
-
-
+termina:
 	li $v0, 4  # código do sitema para printar a string
 	la $a0, fimLinha #endereço da string a imprimir no registrador $a
 	syscall # printando
