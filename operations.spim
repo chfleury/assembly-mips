@@ -6,12 +6,11 @@
     OR: .asciiz "OR: "
 	XOR: .asciiz "XOR: "
 	MASK: .asciiz "MASK: "
-	SLL: .asciiz "SSL("
+	SLL: .asciiz "SLL("
 	SRL: .asciiz "SRL("
 	parenteses: .asciiz "): "
 
 .text
-
 	main:
 		jal lerInteiro # chamando a funcao ler inteiro
 		move $s1, $v0 # movendo o valor para $s1
