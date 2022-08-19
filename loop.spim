@@ -8,7 +8,7 @@
         move $t0, $v0
 
         loop:
-            blt $t0, $zero endLoop
+            bgt $t0, $zero endLoop
 
             li $v0, 1
             move $a0, $t0
