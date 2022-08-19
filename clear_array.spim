@@ -1,0 +1,27 @@
+.data
+    array: .word 2, 4, 0, 3
+
+.text
+
+main:
+    la $a1, array
+    addi $s0, 4
+    move $t0, $zero # i = 0
+
+    loop:
+        sll $t1, $t0, 2 # index  = i * 2
+
+        add $t2, $a1, $t1
+
+        lw $a0, 0 ($t2)
+
+        li $v0, 1
+        syscall
+
+        addi $t0, 1
+        slt $t3, $t0, $s0cd ..
+        bne $zero, $t3 loop
+
+        li $v0, 10
+        syscall
+
