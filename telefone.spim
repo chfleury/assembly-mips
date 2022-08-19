@@ -1,82 +1,80 @@
 .data
     fimLinha: .asciiz "\n"
-    hifen: .asciiz "-"
     numero: .space 15
 .text
     main:
-        li $v0, 8
-        la $a0, numero
-        la $a1, 25
-        syscall
+        li $v0, 8 # codigo para ler string
+        la $a0, numero 
+        la $a1, 15 # Lendo string de no maximo 15 char
+        syscall # lendo
 
-        move $s0, $a0
-        la $s0, hifen
 
-        addi $t1, $zero, 0
+        addi $t1, $zero, 0 # adicionado 0 em $t1 para o while
 
-        loop:
-            lb $t0, numero($t1)
-            move $t2, $t0
+        while:
+            lb $t0, numero($t1) # lendo char da string 
 
-            bge $t2, 65, tratarLetra
-            j print
-
-            tratarLetra:
-                addi $t0, $t0, -65
-
-                blt $t0, 3, printDois
-                blt $t0, 6, printTres
-                blt $t0, 9, printQuatro
-                blt $t0, 12, printCinco
-                blt $t0, 15, printSeis
-                blt $t0, 19, printSete
-                blt $t0, 21, printOito
-                blt $t0, 24, printNove          
-            
-
-           
+            beq $t0, 0, exit # se chegar no fim da string sai do loop
+        
+            move $t2, $t0 # faz uma copia do char da string
+            bge $t0, 65, tratarLetra # se for maior que 65 (ou seja for maior que A na tabela ascii) ele trata a letra
+        
             print:
                 li $v0, 11 # codigo 11 no $v0 para printar um char
-                move $a0, $t0 #endereço da string a imprimir no registrador $a0
+                move $a0, $t2 #endereço da string a imprimir no registrador $a0
                 syscall # printando
-                addi $t1, $t1, 1
+                addi $t1, $t1, 1 # add 1 no $t1 para o while
 
-            bne $t2, 0, loop
+            j while # volta pro while
 
+        exit:
+            li $v0, 4  # código do sitema para printar a string
+            la $a0, fimLinha #endereço da string a imprimir no registrador $a
+            syscall # printando
             li $v0, 10 # codigo do sistema para finalizar o programa
             syscall # finalizando  
 
+        tratarLetra:
+            addi $t2, $t2, -65 # subtrai 65 para que o A (65) vire 0 para ficar mais facil tratar
+
+            # mapeia os numeros para cada letra
+            blt $t2, 3, printDois
+            blt $t2, 6, printTres
+            blt $t2, 9, printQuatro
+            blt $t2, 12, printCinco
+            blt $t2, 15, printSeis
+            blt $t2, 19, printSete
+            blt $t2, 22, printOito
+            blt $t2, 26, printNove
+
             printDois:
-                addi $t0, $t0, 50
-                jr $ra
+                addi $t2, $zero, 50 # adiciona o numero correspondete aos numeros de 2 a 9 na tabela ascii
+                j print # volta pro print para printar $t2
 
             printTres:
-                addi $t0, $t0, 51
-                jr $ra
+                addi $t2, $zero, 51 # adiciona o numero correspondete aos numeros de 2 a 9 na tabela ascii
+                j print # volta pro print para printar $t2
 
             printQuatro:
-                addi $t0, $t0, 52
-                jr $ra
+                addi $t2, $zero, 52 # adiciona o numero correspondete aos numeros de 2 a 9 na tabela ascii
+                j print # volta pro print para printar $t2
 
             printCinco:
-                addi $t0, $t0, 53
-                jr $ra
+                addi $t2, $zero, 53 # adiciona o numero correspondete aos numeros de 2 a 9 na tabela ascii
+                j print # volta pro print para printar $t2
 
             printSeis:
-                addi $t0, $t0, 54
-                jr $ra
+                addi $t2, $zero, 54 # adiciona o numero correspondete aos numeros de 2 a 9 na tabela ascii
+                j print # volta pro print para printar $t2
 
             printSete:
-                addi $t0, $t0, 55
-                jr $ra
+                addi $t2, $zero, 55 # adiciona o numero correspondete aos numeros de 2 a 9 na tabela ascii
+                j print # volta pro print para printar $t2
 
             printOito:
-                addi $t0, $t0, 56
-                jr $ra
+                addi $t2, $zero, 56 # adiciona o numero correspondete aos numeros de 2 a 9 na tabela ascii
+                j print # volta pro print para printar $t2
 
             printNove:
-                addi $t0, $t0, 57
-                jr $ra         
-
-  
-                
+                addi $t2, $zero, 57 # adiciona o numero correspondete aos numeros de 2 a 9 na tabela ascii
+                j print # volta pro print para printar $t2
