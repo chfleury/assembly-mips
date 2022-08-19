@@ -1,5 +1,4 @@
 .data
-    fimLinha: .asciiz "\n"
     numero: .space 15
 .text
     main:
@@ -28,9 +27,6 @@
             j while # volta pro while
 
         exit:
-            li $v0, 4  # código do sitema para printar a string
-            la $a0, fimLinha #endereço da string a imprimir no registrador $a
-            syscall # printando
             li $v0, 10 # codigo do sistema para finalizar o programa
             syscall # finalizando  
 
