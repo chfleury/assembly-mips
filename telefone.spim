@@ -1,0 +1,82 @@
+.data
+    fimLinha: .asciiz "\n"
+    hifen: .asciiz "-"
+    numero: .space 15
+.text
+    main:
+        li $v0, 8
+        la $a0, numero
+        la $a1, 25
+        syscall
+
+        move $s0, $a0
+        la $s0, hifen
+
+        addi $t1, $zero, 0
+
+        loop:
+            lb $t0, numero($t1)
+            move $t2, $t0
+
+            bge $t2, 65, tratarLetra
+            j print
+
+            tratarLetra:
+                addi $t0, $t0, -65
+
+                blt $t0, 3, printDois
+                blt $t0, 6, printTres
+                blt $t0, 9, printQuatro
+                blt $t0, 12, printCinco
+                blt $t0, 15, printSeis
+                blt $t0, 19, printSete
+                blt $t0, 21, printOito
+                blt $t0, 24, printNove          
+            
+
+           
+            print:
+                li $v0, 11 # codigo 11 no $v0 para printar um char
+                move $a0, $t0 #endereço da string a imprimir no registrador $a0
+                syscall # printando
+                addi $t1, $t1, 1
+
+            bne $t2, 0, loop
+
+            li $v0, 10 # codigo do sistema para finalizar o programa
+            syscall # finalizando  
+
+            printDois:
+                addi $t0, $t0, 50
+                jr $ra
+
+            printTres:
+                addi $t0, $t0, 51
+                jr $ra
+
+            printQuatro:
+                addi $t0, $t0, 52
+                jr $ra
+
+            printCinco:
+                addi $t0, $t0, 53
+                jr $ra
+
+            printSeis:
+                addi $t0, $t0, 54
+                jr $ra
+
+            printSete:
+                addi $t0, $t0, 55
+                jr $ra
+
+            printOito:
+                addi $t0, $t0, 56
+                jr $ra
+
+            printNove:
+                addi $t0, $t0, 57
+                jr $ra         
+
+  
+                
