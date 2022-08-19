@@ -1,0 +1,81 @@
+.data
+    thums: .asciiz "THUMS"
+    fimLinha: .asciiz "\n"
+    espaco: .asciiz " "
+
+.text
+    main:
+        li $v0, 5  # código do sitema para leitura de inteiros
+        syscall # lendo o numero
+        move $t0, $v0 # movendo o valor para $t0
+
+        addi $t1, $zero, 3 # salvando 3 em $t1, que sera quantas vezes ele vai printar THUMS
+
+        mainLoop:
+            jal printLineOfThums # chamando funcao que printa uma linha com 3 ou 6 THUMS
+            beq $t1, 3, set6 # se $t1 = 3, seta 6 em $t1
+            addi $t1, $zero, 3 # se $t1 != 3, seta 3 em $t1
+
+            j fimIf
+
+            set6: # essa label seta 6 em $t1
+                addi $t1, $zero, 6
+
+            fimIf:
+
+            addi $t0, $t0, -1 # decrementando 1 para o loop
+            bne $t0, 0, mainLoop # saindo do loop se chegar a 0
+
+        li $v0, 10 # codigo do sistema para finalizar o programa
+        syscall # finalizando    
+
+
+    printLineOfThums:
+    	addi $sp, $sp, -8 # alocando 8 bytes na stack
+		sw $ra, 0($sp) # armazenando a palvra $ra na stack
+		sw $t1, 4($sp) # armazenando $t1 na stack
+
+        loop:
+            move $a1, $t1 # fazendo uma copia de $t1 para passar como parametro na fruncao printThum
+            # se $a1 for 1, vai printar o fimLinha, senao, vai printar espaco
+            jal printThum # printa um THUM
+
+            addi $t1, $t1, -1 # decrementa para o loop
+            bne $t1, 0, loop # sai do loop quando chega a 0
+
+		lw $t1, 4($sp) # lendo o valor que tinhamos salvo na stack de volta para $t1
+		lw $ra, 0($sp) # lendo o valor que tinhamos salvo na stack de volta para $ra 
+		addi $sp, $sp, 8 # desalocando os 8 bytes da stack
+
+        jr $ra # voltando
+
+    printThum:
+    	addi $sp, $sp, -8 # alocando 8 bytes na stack
+		sw $ra, 0($sp) # armazenando a palvra $ra na stack
+		sw $t1, 4($sp) # armazenando a palvra $ra na stack
+
+        li $v0, 4  # código do sitema para printar a string
+	    la $a0, thums #endereço da string a imprimir no registrador $a0
+	    syscall # printando
+
+
+        beq $a1, 1, printFimLiha # checa se $a1 é 1, se sim printa fimLinha senao printa espaco
+
+	    la $a0, espaco #endereço da string a imprimir no registrador $a0
+	    syscall # printando
+
+        j fim
+
+        printFimLiha:
+            li $v0, 4  # código do sitema para printar a fimlinha
+            la $a0, fimLinha #endereço da string a imprimir no registrador $a0
+            syscall # printando
+
+        fim:
+            lw $t1, 4($sp) # lendo o valor que tinhamos salvo na stack de volta para $t1
+            lw $ra, 0($sp) # lendo o valor que tinhamos salvo na stack de volta para $ra 
+            addi $sp, $sp, 8 # desalocando os 8 bytes da stack
+
+            jr $ra # voltando
+
+
