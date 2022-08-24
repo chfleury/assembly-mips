@@ -11,12 +11,17 @@
 		move $t1, $t0
 		jal sqrt
 
+		ble $v0, $zero, printInvalido
+		beq $v0, 1, printNao
+		
 		li $t2, 1
 		li $t3, 0
 
-		move $a0, $t1
-		li $v0, 1 #codigo do sistema para printar inteiros
-		syscall # printando inteiro (resposta)
+		# move $a0, $t1
+		# li $v0, 1 #codigo do sistema para printar inteiros # print para debug
+		# syscall # printando inteiro (resposta)
+
+
         # $t0 tem o valor de entrada
 		# $t1 tem o valor da raiz quadrada da entrada
 		# $t2 começa com 1 e ira iterar até o valor da raiz quadrada ( i )
@@ -39,9 +44,9 @@
 				addi $t2, $t2, 1
 				j while
 		breakWhile:
-			move $a0, $t3
-			li $v0, 1 #codigo do sistema para printar inteiros
-			syscall # printando inteiro (resposta)
+			# move $a0, $t3 # print para debug
+			# li $v0, 1 #codigo do sistema para printar inteiros
+			# syscall # printando inteiro (resposta)
 			beq $t3, 1, printSim
 
 		j printNao
@@ -71,11 +76,11 @@
 
 	sqrt:
 		loopSQRT:
-			div $t3, $t0, $t1   # N/x 
-			add $t1, $t3, $t1   # x + N/x 
-			div $t1, $t1, 2     # (x + N/x)/2 
+			div $t3, $t0, $t1   # raiz quadrada newton
+			add $t1, $t3, $t1   
+			div $t1, $t1, 2      
 
-			#loop
+			# voltando pro loop
 			add $t4, $t4, 1 
    			blt $t4, 20, loopSQRT 
 		jr $ra
