@@ -7,42 +7,56 @@
 	main:
 		li $v0, 5  # código do sitema para leitura de inteiros
 		syscall # lendo o numero
-		move $s0, $v0 # movendo o valor para $t0
+		move $t0, $v0 # movendo o valor para $t0
+		move $t1, $t0
+		jal sqrt
 
-		move $t0, $zero # criando uma copia do numero em t0
-		add $t2, $t2, $zero # inicializando $t2 com o valor 0
-        
-		ble $s0, $zero, printInvalido # se o numero nao for natural, printa invalido e finaliza programa
+		li $t2, 1
+		li $t3, 0
 
-		j loop # se for valido, vai para o loop
+		move $a0, $t1
+		li $v0, 1 #codigo do sistema para printar inteiros
+		syscall # printando inteiro (resposta)
+        # $t0 tem o valor de entrada
+		# $t1 tem o valor da raiz quadrada da entrada
+		# $t2 começa com 1 e ira iterar até o valor da raiz quadrada ( i )
+		# $t3 começa com 0, e ira contar quantos divisores do numero até sua raiz quadrada
+		# $t4 vai ter o resultado do resto de cada divisao no loop
+		while:
+			bgt $t2, $t1, breakWhile # se o valor de i for maior que a raiz quadrada, break
 
-		printInvalido:
+			div $t0, $t2 # divide o input  N por $t0, 
+			mfhi $t4 # pega o resto e armazena em $t1
+
+			beq $t4, 0, incrementaContadorDivisores
+
+			j pulaIncremento
+
+			incrementaContadorDivisores:
+				addi $t3, $t3, 1
+
+			pulaIncremento:
+				addi $t2, $t2, 1
+				j while
+		breakWhile:
+			move $a0, $t3
+			li $v0, 1 #codigo do sistema para printar inteiros
+			syscall # printando inteiro (resposta)
+			beq $t3, 1, printSim
+
+		j printNao
+
+ 		printInvalido:
 			li $v0, 4  # código do sitema para printar a string
 			la $a0, invalido #endereço da string a imprimir no registrador $a
 			syscall # printando	
 			j terminarPrograma # termina o programa
 
-		loop:
-			div $s0, $t0 # divide o input  N por $t0, que vai de N até 1
-			mfhi $t1 # pega o resto e armazena em $t1
-			
-			beq $t1, $zero, somaUm # se o resto for 0, soma 1 em $t2
-
-			j fim # senão, vai para o fim do loop
-			somaUm:
-				addi $t2, $t2, 1 # soma 1 em $t2
-                
-			fim:
-				addi $t0, $t0, 1 # decrementa 1 do contador do loop
-				bne $t0, $s0, loop # volta para o loop 
-        
-        # jal printResposta # chama funcao de printar resposta
-
-        beq $t2, 2, printSim # se $t2 for 2 , printa sim
-		# senão, printa nao
-		li $v0, 4  # código do sitema para printar a string
-		la $a0, nao #endereço da string a imprimir no registrador $a
-		syscall # printando
+ 		printNao:
+			# senão, printa nao
+			li $v0, 4  # código do sitema para printar a string
+			la $a0, nao #endereço da string a imprimir no registrador $a
+			syscall # printando
 
 		j terminarPrograma # vai para o fim da funcao
 
@@ -55,24 +69,13 @@
 			li $v0, 10 # codigo do sistema para finalizar o programa
 			syscall # finalizando
 
-	# printResposta:
-		# addi $sp, $sp, -4 # alocando 4 bytes na stack
-		# # sw $ra, 0($sp) # armazenando a palvra $ra na stack
+	sqrt:
+		loopSQRT:
+			div $t3, $t0, $t1   # N/x 
+			add $t1, $t3, $t1   # x + N/x 
+			div $t1, $t1, 2     # (x + N/x)/2 
 
-		# beq $t2, 2, printSim # se $t2 for 2 , printa sim
-		# # senão, printa nao
-		# li $v0, 4  # código do sitema para printar a string
-		# la $a0, nao #endereço da string a imprimir no registrador $a
-		# syscall # printando
-
-		# j fimPrint # vai para o fim da funcao
-
-		# printSim:
-		# 	li $v0, 4  # código do sitema para printar a string
-		# 	la $a0, sim #endereço da string a imprimir no registrador $a
-		# 	syscall # printando
-
-		# fimPrint:
-		# 	# lw $ra, 0($sp) # lendo o valor que tinhamos salvo na stack de volta para $ra 
-		# 	# addi $sp, $sp, 4 # desalocando os 4 bytes da stack
-		# 	jr $ra # volta de onde foi chamado
+			#loop
+			add $t4, $t4, 1 
+   			blt $t4, 20, loopSQRT 
+		jr $ra
