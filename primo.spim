@@ -1,0 +1,65 @@
+.data
+	sim: .asciiz "sim\n"
+	nao: .asciiz "nao\n"
+	invalido: .asciiz "Entrada invalida.\n"
+
+.text
+	main:
+		li $v0, 5  # código do sitema para leitura de inteiros
+		syscall # lendo o numero
+		move $s0, $v0 # movendo o valor para $t0
+
+		move $t0, $s0 # criando uma copia do numero em t0
+		add $t2, $t2, $zero # inicializando $t2 com o valor 0
+
+		ble $s0, $zero, printInvalido # se o numero nao for natural, printa invalido e finaliza programa
+
+		j loop # se for valido, vai para o loop
+
+		printInvalido:
+			li $v0, 4  # código do sitema para printar a string
+			la $a0, invalido #endereço da string a imprimir no registrador $a
+			syscall # printando	
+			j terminarPrograma # termina o programa
+
+		loop:
+			div $s0, $t0 # divide o input  N por $t0, que vai de N até 1
+			mfhi $t1 # pega o resto e armazena em $t1
+			
+			beq $t1, $zero, somaUm # se o resto for 0, soma 1 em $t2
+
+			j fim # senão, vai para o fim do loop
+			somaUm:
+				addi $t2, $t2, 1 # soma 1 em $t2
+
+			fim:
+				addi $t0, $t0, -1 # decrementa 1 do contador do loop
+				bne $t0, $zero, loop # volta para o loop se ainda nao chegar a 0
+
+		jal printResposta # chama funcao de printar resposta
+
+		terminarPrograma:
+			li $v0, 10 # codigo do sistema para finalizar o programa
+			syscall # finalizando
+
+	printResposta:
+		# addi $sp, $sp, -4 # alocando 4 bytes na stack
+		# sw $ra, 0($sp) # armazenando a palvra $ra na stack
+
+		beq $t2, 2, printSim # se $t2 for 2 , printa sim
+		# senão, printa nao
+		li $v0, 4  # código do sitema para printar a string
+		la $a0, nao #endereço da string a imprimir no registrador $a
+		syscall # printando
+
+		j fimPrint # vai para o fim da funcao
+
+		printSim:
+			li $v0, 4  # código do sitema para printar a string
+			la $a0, sim #endereço da string a imprimir no registrador $a
+			syscall # printando
+
+		fimPrint:
+			# lw $ra, 0($sp) # lendo o valor que tinhamos salvo na stack de volta para $ra 
+			# addi $sp, $sp, 4 # desalocando os 4 bytes da stack
+			jr $ra # volta de onde foi chamado
