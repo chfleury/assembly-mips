@@ -77,8 +77,9 @@
 	sqrt:
 		loopSQRT:
 			div $t3, $t0, $t1   # raiz quadrada newton
-			add $t1, $t3, $t1   
-			div $t1, $t1, 2      
+			div $t5, $t3, 2      # fazendo a divisao separado para evitar overflow aritimetico
+			div $t6, $t1, 2      
+			add $t1, $t5, $t6   
 
 			# voltando pro loop
 			add $t4, $t4, 1 
