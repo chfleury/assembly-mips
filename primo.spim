@@ -9,11 +9,12 @@
 		syscall # lendo o numero
 		move $t0, $v0 # movendo o valor para $t0
 		move $t1, $t0
-		jal sqrt
 
 		ble $v0, $zero, printInvalido
 		beq $v0, 1, printNao
 		
+		jal sqrt
+
 		li $t2, 1
 		li $t3, 0
 
