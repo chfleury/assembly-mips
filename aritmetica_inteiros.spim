@@ -22,13 +22,16 @@
 
 		# $s0, (N1) (N1**N2) % N3
 		# $s1, (N2)
-		# $s3, (N3)
-		# $s4, Resposta
+		# $s2, (N3)
+		# $s3, Resposta
 
 		jal potencia
 
+		div $s0, $s2 # divide o input  N por $t0, 
+		mfhi $s3 # pega o resto e armazena em $t1
+
 		li $v0, 1 # codigo para printar inteiro
-		move $a0, $s0 # movendo o valor do parametro $a2 para $a0
+		move $a0, $s3 # movendo o valor do parametro $a2 para $a0
 		syscall # printando
 
         terminarPrograma:
