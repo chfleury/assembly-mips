@@ -1,20 +1,30 @@
 .data
 	nao: .asciiz "O modulo nao eh primo.\n"
 	invalido: .asciiz "Entradas invalidas.\n"
+    txtUm: .asciiz "A exponencial modular "
+    txtDois: .asciiz " elevado a "
+    txtTres: .asciiz " (mod "
+    txtQuatro: .asciiz ") eh "
+    txtCinco: .asciiz ".\n"
 
 .text
     main:
 		li $v0, 5  # código do sitema para leitura de inteiros
 		syscall # lendo o numero
-        move $s0, $v0 
+        move $s0, $v0
+        move $s5, $v0 
 
 		li $v0, 5  # código do sitema para leitura de inteiros
 		syscall # lendo o numero
         move $s1, $v0
-		
+		move $s6, $v0
+
 		li $v0, 5  # código do sitema para leitura de inteiros
 		syscall # lendo o numero
         move $s2, $v0
+
+        jal checkEntradas # checa se entradas estao no intervalo definido
+
 		move $a1, $v0 # pega o N3 e passa para a1 como parametro
         jal ehPrimo  # chama funcao para verificar se é primo   
 
@@ -24,29 +34,80 @@
 		# $s1, (N2)
 		# $s2, (N3)
 		# $s3, Resposta
+        # $s5, (N1) sem sofrer alterações, no mesmo jeito q foi lido
+        # $s6, (N2) sem sofrer alterações, no mesmo jeito q foi lido
 
 		jal potencia
 
 		div $s0, $s2 # divide o input  N por $t0, 
 		mfhi $s3 # pega o resto e armazena em $t1
 
+        li $v0, 4  # código do sitema para printar a string
+        la $a0, txtUm #endereço da string a imprimir no registrador $a
+        syscall # printando
+
 		li $v0, 1 # codigo para printar inteiro
-		move $a0, $s3 # movendo o valor do parametro $a2 para $a0
+		move $a0, $s5 # movendo o valor do parametro $a2 para $a0
 		syscall # printando
+
+        li $v0, 4  # código do sitema para printar a string
+        la $a0, txtDois #endereço da string a imprimir no registrador $a
+        syscall # printando
+
+		li $v0, 1 # codigo para printar inteiro
+		move $a0, $s6 # movendo o valor do parametro $a2 para $a0
+		syscall # printando
+
+        li $v0, 4  # código do sitema para printar a string
+        la $a0, txtTres #endereço da string a imprimir no registrador $a
+        syscall # printando
+
+		li $v0, 1 # codigo para printar inteiro
+		move $a0, $s2 # movendo o valor do parametro $a2 para $a0
+		syscall # printando
+
+        li $v0, 4  # código do sitema para printar a string
+        la $a0, txtQuatro #endereço da string a imprimir no registrador $a
+        syscall # printando
+
+		li $v0, 1 # codigo para printar inteiro
+		move $a0, $s3 # resposta
+		syscall # printando
+
+        li $v0, 4  # código do sitema para printar a string
+        la $a0, txtCinco #endereço da string a imprimir no registrador $a
+        syscall # printando
+
 
         terminarPrograma:
             li $v0, 10 # codigo do sistema para finalizar o programa
             syscall # finalizando
 
 
+    checkEntradas:
+		# addi $sp, $sp, -4 # alocando 4 bytes na stack
+		# sw $ra, 0($sp) # armazenando a palvra $ra na stack
+
+        # esse funcao checa se todas enradas sao validas
+        blt $s0, 1, printInvalido
+        blt $s1, 1, printInvalido
+        blt $s2, 1, printInvalido
+
+        bgt $s0, 65535, printInvalido
+        bgt $s0, 65535, printInvalido
+        bgt $s0, 65535, printInvalido
+		# lw $ra, 0($sp) # lendo o valor que tinhamos salvo na stack de volta para $ra 
+		# addi $sp, $sp, 4 # desalocando os 4 bytes da stack
+        jr $ra
+
 
 	potencia:
 		addi $sp, $sp, -4 # alocando 4 bytes na stack
 		sw $ra, 0($sp) # armazenando a palvra $ra na stack
 		
-		addi $t0, $s0, 0
+		addi $t0, $s0, 0 # copia de N1
 		loopPotencia:
-			mul $s0, $s0, $t0
+			mul $s0, $s0, $t0 # multiplica N1*N1 a quantidade de N2
 
 			addi $s1, $s1, -1
 			bgt $s1, 1, loopPotencia
@@ -63,7 +124,7 @@
 		move $t1, $t0
 
 
-		ble $t0, $zero, printInvalido
+		ble $t0, $zero, printInvalido 
 		beq $t0, 1, printNao
 
 		jal sqrt
