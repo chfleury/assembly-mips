@@ -6,13 +6,51 @@
     main:
 		li $v0, 5  # código do sitema para leitura de inteiros
 		syscall # lendo o numero
-        move $a1, $v0
-        jal ehPrimo     
+        move $s0, $v0 
+
+		li $v0, 5  # código do sitema para leitura de inteiros
+		syscall # lendo o numero
+        move $s1, $v0
+		
+		li $v0, 5  # código do sitema para leitura de inteiros
+		syscall # lendo o numero
+        move $s2, $v0
+		move $a1, $v0 # pega o N3 e passa para a1 como parametro
+        jal ehPrimo  # chama funcao para verificar se é primo   
+
+		li $s4, 0
+
+		# $s0, (N1) (N1**N2) % N3
+		# $s1, (N2)
+		# $s3, (N3)
+		# $s4, Resposta
+
+		jal potencia
+
+		li $v0, 1 # codigo para printar inteiro
+		move $a0, $s0 # movendo o valor do parametro $a2 para $a0
+		syscall # printando
 
         terminarPrograma:
             li $v0, 10 # codigo do sistema para finalizar o programa
             syscall # finalizando
 
+
+
+	potencia:
+		addi $sp, $sp, -4 # alocando 4 bytes na stack
+		sw $ra, 0($sp) # armazenando a palvra $ra na stack
+		
+		addi $t0, $s0, 0
+		loopPotencia:
+			mul $s0, $s0, $t0
+
+			addi $s1, $s1, -1
+			bgt $s1, 1, loopPotencia
+
+		lw $ra, 0($sp) # lendo o valor que tinhamos salvo na stack de volta para $ra 
+		addi $sp, $sp, 4 # desalocando os 4 bytes da stack
+		jr $ra
 
 	ehPrimo:
 		addi $sp, $sp, -4 # alocando 4 bytes na stack
