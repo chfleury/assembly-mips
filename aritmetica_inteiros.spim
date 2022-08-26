@@ -39,9 +39,6 @@
 
 		jal potencia
 
-		div $s0, $s2 # divide o input  N por $t0, 
-		mfhi $s3 # pega o resto e armazena em $t1
-
         li $v0, 4  # código do sitema para printar a string
         la $a0, txtUm #endereço da string a imprimir no registrador $a
         syscall # printando
@@ -78,7 +75,6 @@
         la $a0, txtCinco #endereço da string a imprimir no registrador $a
         syscall # printando
 
-
         terminarPrograma:
             li $v0, 10 # codigo do sistema para finalizar o programa
             syscall # finalizando
@@ -101,20 +97,45 @@
         jr $ra
 
 
-	potencia:
+
+
+We can easily use the above theorem such that we can get
+A ^ (B ^ C) % M = (A ^ y ) %  M
+
+Now we only need to find two things as:-
+
+
+	potencia: # fazendo a funcao com base em um algoritmo de fast modular exponentiation em C
 		addi $sp, $sp, -4 # alocando 4 bytes na stack
 		sw $ra, 0($sp) # armazenando a palvra $ra na stack
 		
-		addi $t0, $s0, 0 # copia de N1
-		loopPotencia:
-			mul $s0, $s0, $t0 # multiplica N1*N1 a quantidade de N2
+		move $t0, $s0 # b (base)
+		move $t1, $s1 # e (expoente)
+		move $t2, $s2 # m (modulo)
 
-			addi $s1, $s1, -1
-			bgt $s1, 1, loopPotencia
+		# resultado = $s3
+		li $s3, 1 #int resultado = 1;
 
-		lw $ra, 0($sp) # lendo o valor que tinhamos salvo na stack de volta para $ra 
-		addi $sp, $sp, 4 # desalocando os 4 bytes da stack
-		jr $ra
+		and $t8, $t1, 1
+		bne $t8, 0, entraIf # if (1 & e)
+		j loopPontencia # else
+		entraIf:
+			move $s3, $t0 # resultado = b
+		loopPontencia:
+			beq $t1, 0, fimLoopPontencia # if (!e) break
+			srl $t1, $t1, 1 # e >>= 1
+			mul $t0, $t0, $t0
+			div $t0, $t2 # 
+			mfhi $t0 # b = (b*b)%m
+			and $t7, $t1, 1 #
+			beq $t7, 0 , loopPontencia # if (e & 1)
+			mul $s3, $s3, $t0 #
+			div $s3, $t2 # 
+			mfhi $s3 # resultado = (resultado * b) % m
+		fimLoopPontencia:
+			lw $ra, 0($sp) # lendo o valor que tinhamos salvo na stack de volta para $ra 
+			addi $sp, $sp, 4 # desalocando os 4 bytes da stack
+			jr $ra
 
 	ehPrimo:
 		addi $sp, $sp, -4 # alocando 4 bytes na stack
@@ -137,7 +158,7 @@
 		# $t1 tem o valor da raiz quadrada da entrada
 		# $t2 começa com 1 e ira iterar até o valor da raiz quadrada ( i )
 		# $t3 começa com 0, e ira contar quantos divisores do numero até sua raiz quadrada
-		# $t4 vai ter o resultado do resto de cada divisao no loop
+		# $t4 vai ter o resultadoado do resto de cada divisao no loop
 		while:
 			bgt $t2, $t1, breakWhile # se o valor de i for maior que a raiz quadrada, break
 
