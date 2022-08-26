@@ -105,12 +105,20 @@
 		move $t1, $s1 # e (expoente)
 		move $t2, $s2 # m (modulo)
 
-		# resultado = $s3
-		li $s3, 1 #int resultado = 1;
+		beq $t1, 1, trivial # caso o expoente seja 1, a resposta é trivial, sendo = N1%N3
+		j pulaTrivial
+		trivial:
+			div $t0, $t2 # 
+			mfhi $s3 
+			j fimLoopPontencia
 
-		and $t8, $t1, 1
-		bne $t8, 0, entraIf # if (1 & e)
-		j loopPontencia # else
+		# resultado = $s3
+		pulaTrivial:
+			li $s3, 1 #int resultado = 1;
+
+			and $t8, $t1, 1
+			bne $t8, 0, entraIf # if (1 & e)
+			j loopPontencia # else
 		entraIf:
 			move $s3, $t0 # resultado = b
 		loopPontencia:
