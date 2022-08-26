@@ -97,11 +97,6 @@
         jr $ra
 
 
-
-
-
-
-
 	potencia: # fazendo a funcao com base em um algoritmo de fast modular exponentiation em C
 		addi $sp, $sp, -4 # alocando 4 bytes na stack
 		sw $ra, 0($sp) # armazenando a palvra $ra na stack
@@ -110,24 +105,31 @@
 		move $t1, $s1 # e (expoente)
 		move $t2, $s2 # m (modulo)
 
-# tentando pelo pequeno teorema de fermat
-		addi $t3, $t2, -1 # M - 1
-		div $t1, $t3 #  y = (E) % (M - 1)
-		mfhi $t4 # t4 = y
+		# resultado = $s3
+		li $s3, 1 #int resultado = 1;
 
-		addi $t7, $t0, 0 # copia de B
-		loopPotencia:
-			mul $t0, $t0, $t7 # multiplica N1*N1 a quantidade de N2
+		and $t8, $t1, 1
+		bne $t8, 0, entraIf # if (1 & e)
+		j loopPontencia # else
+		entraIf:
+			move $s3, $t0 # resultado = b
+		loopPontencia:
+			beq $t1, 0, fimLoopPontencia # if (!e) break
+			srl $t1, $t1, 1 # e >>= 1
+			mul $t0, $t0, $t0
+			div $t0, $t2 # 
+			mfhi $t0 # b = (b*b)%m
+			and $t7, $t1, 1 #
+			beq $t7, 0 , loopPontencia # if (e & 1)
+			mul $s3, $s3, $t0 #
+			div $s3, $t2 # 
+			mfhi $s3 # resultado = (resultado * b) % m
+			j loopPontencia
 
-			addi $t4, $t4, -1
-			bgt $t4, 1, loopPotencia
-
-		div $t0, $t2 #  y = (E) % (M - 1)
-		mfhi $s3 # t4 = y
-
-		lw $ra, 0($sp) # lendo o valor que tinhamos salvo na stack de volta para $ra 
-		addi $sp, $sp, 4 # desalocando os 4 bytes da stack
-		jr $ra
+		fimLoopPontencia:
+			lw $ra, 0($sp) # lendo o valor que tinhamos salvo na stack de volta para $ra 
+			addi $sp, $sp, 4 # desalocando os 4 bytes da stack
+			jr $ra
 
 	ehPrimo:
 		addi $sp, $sp, -4 # alocando 4 bytes na stack
