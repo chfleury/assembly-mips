@@ -90,8 +90,8 @@
         blt $s2, 1, printInvalido
 
         bgt $s0, 65535, printInvalido
-        bgt $s0, 65535, printInvalido
-        bgt $s0, 65535, printInvalido
+        bgt $s1, 65535, printInvalido
+        bgt $s2, 65535, printInvalido
 		# lw $ra, 0($sp) # lendo o valor que tinhamos salvo na stack de volta para $ra 
 		# addi $sp, $sp, 4 # desalocando os 4 bytes da stack
         jr $ra
