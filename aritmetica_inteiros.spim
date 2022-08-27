@@ -101,47 +101,35 @@
 		addi $sp, $sp, -4 # alocando 4 bytes na stack
 		sw $ra, 0($sp) # armazenando a palvra $ra na stack
 		
-		move $t0, $s0 # b (base)
-		move $t1, $s1 # e (expoente)
-		move $t2, $s2 # m (modulo)
+		move $t0, $s0 # x (base)
+		move $t1, $s1 # y (expoente)
+		move $t2, $s2 # p (modulo)
+		# resposta = $s3
 
+		li $s3, 1 # int resposta = 1
 
+		div $t0, $t2 # x = x % p 
+		mfhi $t0 # pega o resto e armazena em $t0
 
-		beq $t1, 1, trivial # caso o expoente seja 1, a resposta é trivial, sendo = N1%N3
-		j pulaTrivial
-		trivial:
-			div $t0, $t2 # 
-			mfhi $s3 
-			j fimLoopPontencia
+		loopPotencia: # while y > 0
+			and $t6, $t1, 1 # faz and pra ver se o lsb é 1, se for o numero é impar
+			beq $t6, 1, multiplica 	# if y & 1
+			j pulaMultiplica
+			multiplica:
+				mul $s3, $s3, $t0 # resposta = (resposta * x) % p
+				div $s3, $t2,
+				mfhi $s3
+			pulaMultiplica:
+				srl $t1, $t1, 1 # y = y/2
+				mul $t0, $t0, $t0 # x = (x*x) % p
+				div $t0, $t2
+				mfhi $t0
 
-		# resultado = $s3
-		pulaTrivial:
-			div $t0, $t2 # 
-			mfhi $t0  # se base for maior ou igual ao modulo ele atualiza b
-			li $s3, 1 #int resultado = 1;
+			bgt $t1, 0, loopPotencia
 
-			and $t8, $t1, 1
-			bne $t8, 0, entraIf # if (1 & e)
-			j loopPontencia # else
-		entraIf:
-			move $s3, $t0 # resultado = b
-		loopPontencia:
-			beq $t1, 0, fimLoopPontencia # if (!e) break
-			srl $t1, $t1, 1 # e >>= 1
-			mul $t0, $t0, $t0
-			div $t0, $t2 # 
-			mfhi $t0 # b = (b*b)%m
-			and $t7, $t1, 1 #
-			beq $t7, 0 , loopPontencia # if (e & 1)
-			mul $s3, $s3, $t0 #
-			div $s3, $t2 # 
-			mfhi $s3 # resultado = (resultado * b) % m
-			j loopPontencia
-
-		fimLoopPontencia:
-			lw $ra, 0($sp) # lendo o valor que tinhamos salvo na stack de volta para $ra 
-			addi $sp, $sp, 4 # desalocando os 4 bytes da stack
-			jr $ra
+		lw $ra, 0($sp) # lendo o valor que tinhamos salvo na stack de volta para $ra 
+		addi $sp, $sp, 4 # desalocando os 4 bytes da stack
+		jr $ra
 
 	ehPrimo:
 		addi $sp, $sp, -4 # alocando 4 bytes na stack
