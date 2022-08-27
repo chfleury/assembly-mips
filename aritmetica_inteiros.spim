@@ -106,10 +106,13 @@
 		move $t2, $s2 # p (modulo)
 		# resposta = $s3
 
-		li $s3, 1 # int resposta = 1
+		li $s3, 0 # int resposta = 0
 
 		div $t0, $t2 # x = x % p 
 		mfhi $t0 # pega o resto e armazena em $t0
+
+		beq $t0, 0, fimPotencia 
+		li $s3, 1 # int resposta = 1
 
 		loopPotencia: # while y > 0
 			and $t6, $t1, 1 # faz and pra ver se o lsb é 1, se for o numero é impar
@@ -126,10 +129,10 @@
 				mfhi $t0
 
 			bgt $t1, 0, loopPotencia
-
-		lw $ra, 0($sp) # lendo o valor que tinhamos salvo na stack de volta para $ra 
-		addi $sp, $sp, 4 # desalocando os 4 bytes da stack
-		jr $ra
+		fimPotencia:
+			lw $ra, 0($sp) # lendo o valor que tinhamos salvo na stack de volta para $ra 
+			addi $sp, $sp, 4 # desalocando os 4 bytes da stack
+			jr $ra
 
 	ehPrimo:
 		addi $sp, $sp, -4 # alocando 4 bytes na stack
