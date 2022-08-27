@@ -119,13 +119,15 @@
 			beq $t6, 1, multiplica 	# if y & 1
 			j pulaMultiplica
 			multiplica:
-				mul $s3, $s3, $t0 # resposta = (resposta * x) % p
-				div $s3, $t2,
+				multu $s3, $t0 # resposta = (resposta * x) % p
+				mflo $s3
+				divu $s3, $t2,
 				mfhi $s3
 			pulaMultiplica:
 				srl $t1, $t1, 1 # y = y/2
-				mul $t0, $t0, $t0 # x = (x*x) % p
-				div $t0, $t2
+				multu $t0, $t0 # x = (x*x) % p
+				mflo $t0
+				divu $t0, $t2
 				mfhi $t0
 
 			bgt $t1, 0, loopPotencia
