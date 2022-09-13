@@ -1,0 +1,59 @@
+.data
+    str: .space 32
+    fimLinha: .asciiz "\n"
+.text
+    main:
+        li $v0, 8 # codigo para ler string
+        la $a0, str 
+        la $a1, 32 # Lendo string de no maximo 32 char
+        syscall # lendo
+
+
+        addi $t1, $zero, 0 # adicionado 0 em $t1 para o while
+
+        while:
+            lb $t0, str($t1) # lendo char da string 
+          
+            beq $t0, 10, exit # se chegar no fim da string sai do loop
+        
+            move $t2, $t0 # faz uma copia do char da string
+
+            # pegando o numero binario ex: 1101 1010 e dividindo em dois blocos de 4 bits pra printar em hex
+            and $t3, $t2, 240 # bitmask  1111 0000
+            srl $t3, $t3, 4 # pegando apenas os bits de 8-4
+            and $t4, $t2, 15 # bitmask 1111
+
+            # printando ambos char como hex
+            move $a1, $t3
+            jal printHex
+            move $a1, $t4
+            jal printHex
+
+              
+
+                addi $t1, $t1, 1 # add 1 no $t1 para o while
+
+             
+            j while # volta pro while
+
+ 
+        exit:
+            li $v0, 4  # código do sitema para printar a string
+            la $a0, fimLinha #endereço da string a imprimir no registrador $a
+            syscall # printando
+            li $v0, 10 # codigo do sistema para finalizar o programa
+            syscall # finalizando  
+
+        # funcao bem parecida com a feita no exercicio de ieee, so tive que somar 32 a mais pois antes pegava
+        # as letras maiusculas na tabela ascii, agora pega as minusculas
+        
+        printHex:
+            li $v0, 11 # codigo 11 no $v0 para printar um char
+            ble $a1, 9, pularSoma # se o valor do char for <= que 9, pula a soma 
+            add $a1, $a1, 39 # se o valor do char for maior que 9, soma 39 a mais para pegar as letras a, b, c.. 
+
+            pularSoma:
+                addi $a0, $a1 , 48 # somando 48 e salvando em $a0 para pegar o codigo ascii e printar
+                syscall # printando o char
+
+                jr $ra
