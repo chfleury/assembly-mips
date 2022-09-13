@@ -19,8 +19,8 @@ main:
         syscall
 
         addi $t0, 1
-        slt $t3, $t0, $s0cd ..
-        bne $zero, $t3 loop
+        
+        blt $t0, $s0 loop
 
         li $v0, 10
         syscall
