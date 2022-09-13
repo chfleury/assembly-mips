@@ -1,21 +1,22 @@
 .data
-    str: .space 32
+    str: .space 33
     fimLinha: .asciiz "\n"
 .text
     main:
         li $v0, 8 # codigo para ler string
         la $a0, str 
-        la $a1, 32 # Lendo string de no maximo 32 char
+        la $a1, 33 # Lendo string de no maximo 32 char
         syscall # lendo
-
 
         addi $t1, $zero, 0 # adicionado 0 em $t1 para o while
 
         while:
             lb $t0, str($t1) # lendo char da string 
           
+            beq $t1, 32, exit
+            
             beq $t0, 10, exit # se chegar no fim da string sai do loop
-        
+
             move $t2, $t0 # faz uma copia do char da string
 
             # pegando o numero binario ex: 1101 1010 e dividindo em dois blocos de 4 bits pra printar em hex
@@ -29,13 +30,9 @@
             move $a1, $t4
             jal printHex
 
-              
+            addi $t1, $t1, 1 # add 1 no $t1 para o while
 
-                addi $t1, $t1, 1 # add 1 no $t1 para o while
-
-             
             j while # volta pro while
-
  
         exit:
             li $v0, 4  # código do sitema para printar a string
