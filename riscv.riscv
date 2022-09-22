@@ -53,16 +53,17 @@
 		
 		la s6, MASK  # carregando a string para o registrador s6
 		andi s3, s5, 31  # faz um and entre s5 e 31 e salva em s3
+        mv s7, s3
 		jal printarOperacao # chamando a função printarOperação passando s6 e s3 como parametros
 	
 
 		# parametros do printarShift: s6, string( SLL ou SRL), s3: resultado do and da mascara, s3, resultado do shift
 		la s6, SLL  # carregando a string para o registrador s6
-		sll s3, s2, s3  # fazendo a operação e salvando no registrador s3
+		sll s8, s2, s3  # fazendo a operação e salvando no registrador s3
 		jal printarShift # chamando a função de printarShift
 		
 		la s6, SRL  # carregando a string para o registrador s6
-		srl s3, s4, s3 # fazendo a operação e salvando no registrador s3
+		srl s8, s4, s3 # fazendo a operação e salvando no registrador s3
 		jal printarShift # chamando a função de printarShift
 
 		j finalizarPrograma # jump para terminar o programa
@@ -106,7 +107,7 @@
 		ecall # printando
 
 		li a7, 1 # codigo para printar inteiro
-		mv a0, s3 # mvndo o valor do parametro s3 para a0
+		mv a0, s7 # mvndo o valor do parametro s3 para a0
 		ecall # printando
 
 		li a7, 4 # codigo para printar string
@@ -114,7 +115,7 @@
 		ecall # printando a fecha de parenteses
 
 		li a7, 1 # codigo para printar inteiro
-		mv a0, s3 # mvndo o valor do parametro s3 (resultado do shift) para a0
+		mv a0, s8 # mvndo o valor do parametro s3 (resultado do shift) para a0
 		ecall # printando
 
 		jal printarFimLinha # chamando função para printar quebra de linha
